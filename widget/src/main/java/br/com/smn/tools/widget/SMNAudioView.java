@@ -77,11 +77,14 @@ public class SMNAudioView extends LinearLayout {
     public void loadSMNAudio(final SMNAudio smnAudio, final Activity activity) {
         this.smnAudio = smnAudio;
 
+        tvTotalTime.setText(smnAudio.getFormatedTotalTime());
+        skTimeLine.setMax(smnAudio.getMediaPlayer().getDuration());
+
         ivPlayPause.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (smnAudio.isPlaying()) {
-                    ivPlayPause.setImageResource(R.drawable.ic_pause);
+                    ivPlayPause.setImageResource(R.drawable.ic_play);
                     smnAudio.pause();
                 } else {
                     smnAudio.play(new OnAudioPlayingListener() {
@@ -97,7 +100,7 @@ public class SMNAudioView extends LinearLayout {
                         }
                     });
 
-                    ivPlayPause.setImageResource(R.drawable.ic_play);
+                    ivPlayPause.setImageResource(R.drawable.ic_pause);
                 }
             }
         });

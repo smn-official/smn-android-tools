@@ -25,7 +25,6 @@
             android:layout_width="match_parent"
             android:layout_height="5dp"
             android:layout_marginRight="5dp"
-            android:max="100"
             android:progress="0"/>
 
     </LinearLayout>
