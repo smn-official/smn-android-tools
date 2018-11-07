@@ -53,6 +53,23 @@ public class SMNUtilities {
         }
     }
 
+    public static boolean isRecordAudioPermissionGranted(Context context) {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                Log.v("PERMISSION", "Permission is granted");
+
+                return true;
+            } else {
+                Log.v("PERMISSION", "Permission is revoked");
+                return false;
+            }
+        }
+        else { //permission is automatically granted on sdk<23 upon installation
+            Log.v("PERMISSION", "Permission is granted");
+            return true;
+        }
+    }
+
     public static void createDirectory(String directoryPath, Context context) throws SMNException {
         boolean checkPermission = isStoragePermissionGranted(context);
         if(!checkPermission)

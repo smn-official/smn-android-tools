@@ -74,20 +74,40 @@ public class SMNAudioView extends LinearLayout {
         return smnAudio;
     }
 
-    public void loadSMNAudio(final SMNAudio smnAudio, final Activity activity) {
+    public void loadSMNAudio(SMNAudio smnAudio, final Activity activity) {
         this.smnAudio = smnAudio;
 
         tvTotalTime.setText(smnAudio.getFormatedTotalTime());
         skTimeLine.setMax(smnAudio.getMediaPlayer().getDuration());
 
+        skTimeLine.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(fromUser) {
+                    SMNAudioView.this.smnAudio.seekTo(progress);
+                    tvTimeElapsed.setText(SMNAudioView.this.smnAudio.getFormatedCurrentTime());
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
         ivPlayPause.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (smnAudio.isPlaying()) {
+                if (SMNAudioView.this.smnAudio.isPlaying()) {
                     ivPlayPause.setImageResource(R.drawable.ic_play);
-                    smnAudio.pause();
+                    SMNAudioView.this.smnAudio.pause();
                 } else {
-                    smnAudio.play(new OnAudioPlayingListener() {
+                    SMNAudioView.this.smnAudio.play(new OnAudioPlayingListener() {
                         @Override
                         public void onPlaying(int currentPosition, final String formatedTime) {
                             skTimeLine.setProgress(currentPosition);
