@@ -14,7 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
 
-import br.com.smn.tools.exception.SMNSignatureException;
+import br.com.smn.tools.exception.SMNException;
 import br.com.smn.tools.util.SMNUtilities;
 
 public class SMNSignature {
@@ -22,7 +22,7 @@ public class SMNSignature {
     private File signaturePath;
     private Context context;
 
-    public SMNSignature(@NonNull SignatureView signatureView, @NonNull File signaturePath, @NonNull Context context) throws SMNSignatureException {
+    public SMNSignature(@NonNull SignatureView signatureView, @NonNull File signaturePath, @NonNull Context context) throws SMNException {
         this.signatureView = signatureView;
         this.signaturePath = signaturePath;
         this.context = context;
@@ -30,7 +30,7 @@ public class SMNSignature {
         SMNUtilities.createDirectory(signaturePath.getAbsolutePath(), context);
     }
 
-    public SMNSignature(@NonNull SignatureView signatureView, @NonNull String signaturePath, @NonNull Context context) throws SMNSignatureException {
+    public SMNSignature(@NonNull SignatureView signatureView, @NonNull String signaturePath, @NonNull Context context) throws SMNException {
         this.signatureView = signatureView;
         this.signaturePath = new File(signaturePath);
         this.context = context;

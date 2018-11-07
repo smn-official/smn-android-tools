@@ -5,24 +5,34 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.util.Base64;
 import android.util.Log;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Locale;
-
-import br.com.smn.tools.exception.SMNSignatureException;
+import br.com.smn.tools.exception.SMNException;
+import br.com.smn.tools.interfaces.SMNDownloadListener;
 
 public class SMNUtilities {
     static NumberFormat nf = new DecimalFormat("#,##0.00", new DecimalFormatSymbols(new Locale("pt", "BR")));
 
     public static String getMonetaryStringValue(double value){
         return nf.format(value);
+    }
+
+    public static double getMonetaryDoubleValue(String value) throws ParseException {
+        return nf.parse(value).doubleValue();
     }
 
     public static boolean isStoragePermissionGranted(Context context) {
@@ -43,20 +53,20 @@ public class SMNUtilities {
         }
     }
 
-    public static void createDirectory(String directoryPath, Context context) throws SMNSignatureException {
+    public static void createDirectory(String directoryPath, Context context) throws SMNException {
         boolean checkPermission = isStoragePermissionGranted(context);
         if(!checkPermission)
-            throw new SMNSignatureException("Você não possui permissão para criar/ler arquivos!");
+            throw new SMNException("Você não possui permissão para criar/ler arquivos!");
 
         File directory = new File(directoryPath);
 
         if(!directory.isDirectory())
-            throw new SMNSignatureException("O Caminho informado não é um diretório!");
+            throw new SMNException("O Caminho informado não é um diretório!");
 
         if(!directory.exists()) {
             boolean resultDir = directory.mkdir();
             if(!resultDir)
-                throw new SMNSignatureException("Não foi possível criar o diretório: " + "\'" + directoryPath + "\'");
+                throw new SMNException("Não foi possível criar o diretório: " + "\'" + directoryPath + "\'");
         }
     }
 
@@ -74,5 +84,82 @@ public class SMNUtilities {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
 
         return Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT);
+    }
+
+    /**
+     * Verifica se o dispositivo está com uma conexão ativa com à internet.
+     * @param context necessário para recuperar o serviço que controla a conectividade do dispositivo.
+     * @return true se existir conexão, false caso não exista conexão.
+     */
+    public static boolean verifyConnection(Context context) {
+        boolean connected;
+        ConnectivityManager conectivtyManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (conectivtyManager.getActiveNetworkInfo() != null
+                && conectivtyManager.getActiveNetworkInfo().isAvailable()
+                && conectivtyManager.getActiveNetworkInfo().isConnected()) {
+            connected = true;
+        } else {
+            connected = false;
+        }
+
+        return connected;
+    }
+
+    /**
+     * Faz o download de um arquivo à partir de uma URL válida e salva no local de destino informado,
+     * o local poderá ser o diretório onde o arquivo será salvo, ou um arquivo com o nome préviamente informado.
+     * Durante o download vários eventos são lançados e capturados pelo listener
+     * @param urlFile Link do arquivo para fazer o download
+     * @param fileOutput Local onde será salvo o arquivo baixado
+     * @param smnDownloadListener Listener que lança eventos durante o download do arquivo
+     */
+    public static void downloadFile(String urlFile, File fileOutput, SMNDownloadListener smnDownloadListener){
+        try {
+            URL url = new URL(urlFile);
+            HttpURLConnection urlCon = (HttpURLConnection) url.openConnection();
+
+            urlCon.setReadTimeout(30000);
+            urlCon.setConnectTimeout(30000);
+            urlCon.setDoInput(true);
+            urlCon.setRequestMethod("GET");
+            urlCon.connect();
+
+            InputStream in = urlCon.getInputStream();
+
+            FileOutputStream fos;
+
+            String filename = urlFile.substring(urlFile.lastIndexOf("/") + 1, urlFile.length());
+
+            if(fileOutput.isDirectory())
+                fos = new FileOutputStream(fileOutput.getAbsolutePath() + "/" + filename);
+            else
+                fos = new FileOutputStream(fileOutput);
+
+            byte buff[] = new byte[1024];
+            int bytesRead;
+            long totalBytesRead = 0;
+            int percentCompleted = 0;
+            long fileSize = urlCon.getContentLength();
+
+            while ((bytesRead = in.read(buff)) != -1) {
+                fos.write(buff, 0, bytesRead);
+                fos.flush();
+
+                totalBytesRead += bytesRead;
+                int newPercent = (int) (totalBytesRead * 100 / fileSize);
+
+                if(percentCompleted != newPercent){
+                    smnDownloadListener.onProgress(percentCompleted);
+                    percentCompleted = newPercent;
+                }
+            }
+
+            fos.close();
+
+            smnDownloadListener.onComplete();
+        } catch (IOException e) {
+            e.printStackTrace();
+            smnDownloadListener.onFail(e);
+        }
     }
 }
