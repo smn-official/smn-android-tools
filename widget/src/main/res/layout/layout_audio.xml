@@ -3,8 +3,7 @@
     android:id="@+id/llAudioLayout"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/shape_audio_view">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"

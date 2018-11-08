@@ -12,8 +12,9 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        app:progress="0"
+        app:progress="30"
         app:elapsedTimeColor="#000000"
-        app:totalTimeColor="#000000"/>
+        app:totalTimeColor="#000000"
+        app:backgroundContainer="@drawable/shape_audio"/>
 
 </LinearLayout>

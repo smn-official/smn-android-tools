@@ -20,6 +20,7 @@ public class SMNAudioView extends LinearLayout {
     private TextView tvTimeElapsed, tvTotalTime;
     private ImageView ivPlayPause;
     private SeekBar skTimeLine;
+    private LinearLayout llAudioLayout;
     private SMNAudio smnAudio;
 
     public SMNAudioView(Context context, @Nullable AttributeSet attrs) {
@@ -27,7 +28,10 @@ public class SMNAudioView extends LinearLayout {
         init(context, attrs);
     }
 
-    private void initComponents(int elapsedTime, int totalTime, int progress) {
+    private void initComponents(int backgroundContainer, int elapsedTime, int totalTime, int progress) {
+        llAudioLayout = findViewById(R.id.llAudioLayout);
+        llAudioLayout.setBackgroundResource(backgroundContainer);
+
         tvTimeElapsed = findViewById(R.id.tvTimeElapsed);
         tvTimeElapsed.setTextColor(elapsedTime);
 
@@ -49,10 +53,11 @@ public class SMNAudioView extends LinearLayout {
         int elapsedTimeColor = a.getColor(R.styleable.Options_elapsedTimeColor, getResources().getColor(R.color.default_time_color));
         int totalTimeColor = a.getColor(R.styleable.Options_totalTimeColor, getResources().getColor(R.color.default_time_color));
         int progress = a.getInt(R.styleable.Options_progress, 0);
+        int backgroundContainer = a.getInt(R.styleable.Options_backgroundContainer, R.drawable.shape_audio_view);
 
         a.recycle();
 
-        initComponents(elapsedTimeColor, totalTimeColor, progress);
+        initComponents(backgroundContainer, elapsedTimeColor, totalTimeColor, progress);
     }
 
     public TextView getTvTimeElapsed() {
