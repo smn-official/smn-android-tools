@@ -27,12 +27,12 @@ public class SMNAudioView extends LinearLayout {
         init(context, attrs);
     }
 
-    private void initComponents(String elapsedTime, String totalTime, int progress) {
+    private void initComponents(int elapsedTime, int totalTime, int progress) {
         tvTimeElapsed = findViewById(R.id.tvTimeElapsed);
-        tvTimeElapsed.setTextColor(Color.parseColor(elapsedTime));
+        tvTimeElapsed.setTextColor(elapsedTime);
 
         tvTotalTime = findViewById(R.id.tvTotalTime);
-        tvTotalTime.setTextColor(Color.parseColor(totalTime));
+        tvTotalTime.setTextColor(totalTime);
 
         ivPlayPause = findViewById(R.id.ivPlayPause);
 
@@ -46,8 +46,8 @@ public class SMNAudioView extends LinearLayout {
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.Options, 0, 0);
 
-        String elapsedTimeColor = a.getString(R.styleable.Options_elapsedTimeColor);
-        String totalTimeColor = a.getString(R.styleable.Options_totalTimeColor);
+        int elapsedTimeColor = a.getColor(R.styleable.Options_elapsedTimeColor, getResources().getColor(R.color.default_time_color));
+        int totalTimeColor = a.getColor(R.styleable.Options_totalTimeColor, getResources().getColor(R.color.default_time_color));
         int progress = a.getInt(R.styleable.Options_progress, 0);
 
         a.recycle();
