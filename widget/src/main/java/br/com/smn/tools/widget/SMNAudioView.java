@@ -2,6 +2,8 @@ package br.com.smn.tools.widget;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -25,17 +27,32 @@ public class SMNAudioView extends LinearLayout {
         init(context, attrs);
     }
 
-    private void initComponents() {
+    private void initComponents(String elapsedTime, String totalTime, int progress) {
         tvTimeElapsed = findViewById(R.id.tvTimeElapsed);
+        tvTimeElapsed.setTextColor(Color.parseColor(elapsedTime));
+
         tvTotalTime = findViewById(R.id.tvTotalTime);
+        tvTotalTime.setTextColor(Color.parseColor(totalTime));
+
         ivPlayPause = findViewById(R.id.ivPlayPause);
+
         skTimeLine = findViewById(R.id.skTimeLine);
+        skTimeLine.setProgress(progress);
     }
 
     private void init(Context context, AttributeSet attrs) {
         inflate(context, R.layout.layout_audio, this);
 
-        initComponents();
+        TypedArray a = context.obtainStyledAttributes(attrs,
+                R.styleable.Options, 0, 0);
+
+        String elapsedTimeColor = a.getString(R.styleable.Options_elapsedTimeColor);
+        String totalTimeColor = a.getString(R.styleable.Options_totalTimeColor);
+        int progress = a.getInt(R.styleable.Options_progress, 0);
+
+        a.recycle();
+
+        initComponents(elapsedTimeColor, totalTimeColor, progress);
     }
 
     public TextView getTvTimeElapsed() {
