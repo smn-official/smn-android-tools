@@ -5,5 +5,8 @@
         <attr name="totalTimeColor" format="color"/>
         <attr name="progress" format="integer"/>
         <attr name="backgroundContainer" format="integer"/>
+        <attr name="audioTitle" format="string"/>
+        <attr name="deleteTrack" format="boolean"/>
+        <attr name="downloadTrack" format="boolean"/>
     </declare-styleable>
 </resources>
