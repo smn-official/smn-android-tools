@@ -23,13 +23,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         smnAudioView = findViewById(R.id.avAudioView);
-        smnAudioView.readyToPlayForStream(this, "https://s3-us-west-2.amazonaws.com/smn-mobile/cdp-desenv/Through+The+Fire+And+Flames.mp3");
+        smnAudioView.readyToPlayForStreamAsync(this, "https://s3-us-west-2.amazonaws.com/smn-mobile/cdp-desenv/Through+The+Fire+And+Flames.mp3");
+
         smnAudioView.addDeleteEvent(new OnDeleteEventListener() {
             @Override
             public void onDelete() {
                 Toast.makeText(getApplicationContext(), "DELETOU!!!", Toast.LENGTH_SHORT).show();
             }
         });
-        System.out.println("");
     }
 }

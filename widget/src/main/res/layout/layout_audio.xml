@@ -26,13 +26,37 @@
         android:orientation="horizontal"
         android:gravity="center">
 
-        <ImageView
-            android:id="@+id/ivPlayPause"
+        <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_play"
-            android:padding="5dp"
-            android:clickable="true"/>
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/ivPlayPause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_play"
+                android:padding="5dp"
+                android:clickable="true"/>
+
+            <ImageView
+                android:id="@+id/ivReload"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_reload"
+                android:padding="5dp"
+                android:visibility="gone"
+                android:clickable="true"/>
+
+            <ProgressBar
+                android:id="@+id/pbLoadAudioPlay"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:padding="5dp"
+                android:visibility="gone"
+                android:layout_gravity="center"/>
+
+        </FrameLayout>
 
         <SeekBar
             android:id="@+id/skTimeLine"

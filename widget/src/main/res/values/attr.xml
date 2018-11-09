@@ -8,5 +8,6 @@
         <attr name="audioTitle" format="string"/>
         <attr name="deleteTrack" format="boolean"/>
         <attr name="downloadTrack" format="boolean"/>
+        <attr name="backToBegin" format="boolean"/>
     </declare-styleable>
 </resources>
