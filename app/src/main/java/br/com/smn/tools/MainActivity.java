@@ -6,10 +6,12 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.IOException;
 
 import br.com.smn.tools.audio.SMNAudio;
 import br.com.smn.tools.exception.SMNException;
 import br.com.smn.tools.interfaces.OnPlayerEventListener;
+import br.com.smn.tools.interfaces.SMNDownloadListener;
 import br.com.smn.tools.widget.SMNAudioView;
 import br.com.smn.tools.widget.interfaces.OnDeleteEventListener;
 
@@ -23,7 +25,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         smnAudioView = findViewById(R.id.avAudioView);
-        smnAudioView.readyToPlayForStreamAsync(this, "https://s3-us-west-2.amazonaws.com/smn-mobile/cdp-desenv/Through+The+Fire+And+Flames.mp3");
+        smnAudioView.readyToPlayForStreamAsync(
+                this,
+                "https://s3-us-west-2.amazonaws.com/smn-mobile/cdp-desenv/Through+The+Fire+And+Flames.mp3",
+                new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/SMNTools/Audios")
+        );
 
         smnAudioView.addDeleteEvent(new OnDeleteEventListener() {
             @Override

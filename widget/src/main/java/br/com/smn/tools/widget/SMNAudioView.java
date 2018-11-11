@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -14,12 +15,19 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import java.io.File;
+import java.io.IOException;
+
 import br.com.smn.tools.audio.SMNAudio;
 import br.com.smn.tools.exception.SMNException;
 import br.com.smn.tools.interfaces.OnAudioPlayingListener;
 import br.com.smn.tools.interfaces.OnPlayerEventListener;
+import br.com.smn.tools.interfaces.SMNDownloadListener;
+import br.com.smn.tools.util.SMNUtilities;
 import br.com.smn.tools.widget.entity.AudioPropertiesEntity;
+import br.com.smn.tools.widget.entity.DownloadAudioEntity;
 import br.com.smn.tools.widget.interfaces.OnDeleteEventListener;
 
 public class SMNAudioView extends LinearLayout {
@@ -34,10 +42,13 @@ public class SMNAudioView extends LinearLayout {
     private OnDeleteEventListener onDeleteEventListener;
     private ProgressBar pbLoadAudioPlay;
     private boolean backToBegin;
+    private Context context;
+    private File downloadPath;
 
     public SMNAudioView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init(context, attrs);
+        this.context = context;
     }
 
     private void initComponents(Drawable backgroundContainer, int elapsedTime, int totalTime, int progress, String audioTitle, boolean deleteTrack, boolean downloadTrack) {
@@ -74,12 +85,26 @@ public class SMNAudioView extends LinearLayout {
         skTimeLine = findViewById(R.id.skTimeLine);
         skTimeLine.setProgress(progress);
 
+        ivDownloadTrack = findViewById(R.id.ivDownloadTrack);
         tvDownloadPercent = findViewById(R.id.tvDownloadPercent);
         llDownloadContainer = findViewById(R.id.llDownloadContainer);
-
-        ivDownloadTrack = findViewById(R.id.ivDownloadTrack);
         if(downloadTrack)
             ivDownloadTrack.setVisibility(View.VISIBLE);
+
+        ivDownloadTrack.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(SMNUtilities.checkIfStreamFileExistOnDisk(urlStream, downloadPath))
+                    Toast.makeText(getContext(), "Arquivo já existe em: " + downloadPath.getAbsolutePath(), Toast.LENGTH_LONG).show();
+                else{
+                    try {
+                        downloadAudio();
+                    } catch (SMNException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
 
         pbLoadAudioPlay = findViewById(R.id.pbLoadAudioPlay);
         ivReload = findViewById(R.id.ivReload);
@@ -196,9 +221,19 @@ public class SMNAudioView extends LinearLayout {
      * Método síncrono que carrega uma view de audio por stream de dados, a view geralmente aparece após o audio ser carregado pelo buffer e estiver pronto para execução
      * @param activity referência de contexto para onde o audio será apresentado
      * @param urlStream URL do audio para ser reproduzido
+     * @param downloadPath Informando um diretório no parametro será onde o audio será salvo caso iniciado um download, se passado nulo, mesmo habilitando o icone de download ele desaparecerá na view
      */
-    public void readyToPlayForStream(final Activity activity, String urlStream){
+    public void readyToPlayForStream(@NonNull final Activity activity, @NonNull String urlStream, File downloadPath){
         this.urlStream = urlStream;
+        this.downloadPath = downloadPath;
+
+        if(downloadPath == null)
+            ivDownloadTrack.setVisibility(View.GONE);
+        else {
+            if(SMNUtilities.checkIfStreamFileExistOnDisk(this.urlStream, this.downloadPath))
+                ivDownloadTrack.setImageResource(R.drawable.ic_check);
+        }
+
         this.smnAudio = new SMNAudio();
 
         smnAudio.readyToPlayForStream(urlStream, new OnPlayerEventListener() {
@@ -228,9 +263,19 @@ public class SMNAudioView extends LinearLayout {
      * Método assíncrono que carrega uma view de audio por stream de dados, a view aparece com um loading e aguarda até que o áudio esteja pronto para executar
      * @param activity referência de contexto para onde o audio será apresentado
      * @param urlStream URL do audio para ser reproduzido
+     * @param downloadPath Informando um diretório no parametro será onde o audio será salvo caso iniciado um download, se passado nulo, mesmo habilitando o icone de download ele desaparecerá na view
      */
-    public void readyToPlayForStreamAsync(final Activity activity, String urlStream){
+    public void readyToPlayForStreamAsync(@NonNull final Activity activity, @NonNull String urlStream, File downloadPath){
         this.urlStream = urlStream;
+        this.downloadPath = downloadPath;
+
+        if(downloadPath == null)
+            ivDownloadTrack.setVisibility(View.GONE);
+        else {
+            if(SMNUtilities.checkIfStreamFileExistOnDisk(this.urlStream, this.downloadPath))
+                ivDownloadTrack.setImageResource(R.drawable.ic_check);
+        }
+
         this.smnAudio = new SMNAudio();
 
         new AsyncLoadAudio(activity).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -247,10 +292,20 @@ public class SMNAudioView extends LinearLayout {
      * Método síncrono que carrega uma view de audio por stream de dados, a view geralmente aparece após o audio ser carregado pelo buffer e estiver pronto para execução.
      * @param activity referência de contexto para onde o audio será apresentado.
      * @param urlStream URL do audio para ser reproduzido.
+     * @param downloadPath Informando um diretório no parametro será onde o audio será salvo caso iniciado um download, se passado nulo, mesmo habilitando o icone de download ele desaparecerá na view
      * @param onPlayerEventListener Listener que joga para o desenvolvedor os eventos que acontecem no player caso seja necessário um tratamento adicional.
      */
-    public void readyToPlayForStream(final Activity activity, String urlStream, final OnPlayerEventListener onPlayerEventListener){
+    public void readyToPlayForStream(@NonNull final Activity activity, @NonNull String urlStream, File downloadPath, final OnPlayerEventListener onPlayerEventListener){
         this.urlStream = urlStream;
+        this.downloadPath = downloadPath;
+
+        if(downloadPath == null)
+            ivDownloadTrack.setVisibility(View.GONE);
+        else {
+            if(SMNUtilities.checkIfStreamFileExistOnDisk(this.urlStream, this.downloadPath))
+                ivDownloadTrack.setImageResource(R.drawable.ic_check);
+        }
+
         this.smnAudio = new SMNAudio();
 
         smnAudio.readyToPlayForStream(urlStream, new OnPlayerEventListener() {
@@ -287,6 +342,16 @@ public class SMNAudioView extends LinearLayout {
 
     public void addDeleteEvent(OnDeleteEventListener onDeleteEventListener){
         this.onDeleteEventListener = onDeleteEventListener;
+    }
+
+    private void downloadAudio()throws SMNException{
+        SMNUtilities.createDirectory(this.downloadPath, context);
+
+        String urlStream = this.urlStream;
+        if(urlStream == null || urlStream.isEmpty())
+            throw new SMNException("URL de áudio não encontrada! Verifique se o método 'readyToPlayForStream' foi invocado previamente.");
+
+        new AsyncDownloadAudio(urlStream, downloadPath).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private class AsyncLoadAudio extends AsyncTask<Void, Void, Void>{
@@ -375,7 +440,89 @@ public class SMNAudioView extends LinearLayout {
                     break;
                 }
             }
+        }
+    }
 
+    private class AsyncDownloadAudio extends AsyncTask<Void, Void, Void>{
+        private String urlStream;
+        private File downloadPath;
+
+        private DownloadAudioEntity downloadAudioEntity;
+
+        private AsyncDownloadAudio(String urlStream, File downloadPath) {
+            this.urlStream = urlStream;
+            this.downloadPath = downloadPath;
+
+            downloadAudioEntity = new DownloadAudioEntity(0, 0, null);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            SMNUtilities.downloadFile(urlStream, downloadPath, new SMNDownloadListener() {
+                @Override
+                public void onStart() {
+                    publishProgress(null);
+                }
+
+                @Override
+                public void onProgress(int percent) {
+                    downloadAudioEntity.setStatus(1);
+                    downloadAudioEntity.setProgress(percent);
+
+                    publishProgress(null);
+                }
+
+                @Override
+                public void onFail(IOException ex) {
+                    downloadAudioEntity.setStatus(3);
+                    downloadAudioEntity.setIoException(ex);
+
+                    publishProgress(null);
+                }
+
+                @Override
+                public void onComplete() {
+                    downloadAudioEntity.setStatus(2);
+                    publishProgress(null);
+                }
+            });
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+
+            switch(downloadAudioEntity.getStatus()){
+                case 0:{
+                    ivDownloadTrack.setVisibility(View.GONE);
+                    llDownloadContainer.setVisibility(View.VISIBLE);
+                    break;
+                }
+
+                case 1:{
+                    tvDownloadPercent.setText(String.valueOf(downloadAudioEntity.getProgress()));
+                    break;
+                }
+
+                case 2:{
+                    llDownloadContainer.setVisibility(View.GONE);
+                    ivDownloadTrack.setVisibility(View.VISIBLE);
+
+                    ivDownloadTrack.setImageResource(R.drawable.ic_check);
+
+                    Toast.makeText(getContext(), "Download completed.", Toast.LENGTH_LONG).show();
+                    break;
+                }
+
+                case 3:{
+                    llDownloadContainer.setVisibility(View.GONE);
+                    ivDownloadTrack.setVisibility(View.VISIBLE);
+
+                    Toast.makeText(getContext(), "Download failed... TRY AGAIN.", Toast.LENGTH_LONG).show();
+                    break;
+                }
+            }
         }
     }
 }

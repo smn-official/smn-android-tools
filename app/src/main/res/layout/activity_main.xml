@@ -18,7 +18,7 @@
         app:backgroundContainer="@drawable/shape_audio"
         app:audioTitle="Nome da Musica"
         app:deleteTrack="true"
-        app:downloadTrack="false"
+        app:downloadTrack="true"
         app:backToBegin="true"/>
 
 </LinearLayout>

@@ -87,6 +87,44 @@ public class SMNUtilities {
         }
     }
 
+    public static void createDirectory(File directory, Context context) throws SMNException {
+        boolean checkPermission = isStoragePermissionGranted(context);
+        if(!checkPermission)
+            throw new SMNException("Você não possui permissão para criar/ler arquivos!");
+
+        if(directory == null)
+            throw new SMNException("File informado não foi instanciado ainda!");
+
+        if(directory.exists()){
+            if(!directory.isDirectory())
+                throw new SMNException("O Caminho informado não é um diretório!");
+        }
+
+        if(!directory.exists()) {
+            boolean resultDir = directory.mkdirs();
+            if(!resultDir)
+                throw new SMNException("Não foi possível criar o(s) diretório(s)!");
+        }
+    }
+
+    public static boolean checkIfStreamFileExistOnDisk(String urlStream, File dir){
+        String filename = urlStream.substring(urlStream.lastIndexOf("/") + 1, urlStream.length());
+
+        File aux;
+
+        if(dir.exists() && dir.isDirectory())
+            aux = new File(dir.getAbsolutePath() + "/" + filename);
+        else if(dir.exists() && dir.isFile())
+            aux = new File(dir.getParent() + "/" + filename);
+        else
+            return false;
+
+        if(aux.exists())
+            return true;
+
+        return false;
+    }
+
     public static Bitmap base64ToBitmap(String base64Str) throws IllegalArgumentException {
         byte[] decodedBytes = Base64.decode(
                 base64Str.substring(base64Str.indexOf(",")  + 1),
@@ -132,6 +170,8 @@ public class SMNUtilities {
      */
     public static void downloadFile(String urlFile, File fileOutput, SMNDownloadListener smnDownloadListener){
         try {
+            smnDownloadListener.onStart();
+
             URL url = new URL(urlFile);
             HttpURLConnection urlCon = (HttpURLConnection) url.openConnection();
 
