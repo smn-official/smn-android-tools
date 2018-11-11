@@ -94,15 +94,19 @@ public class SMNAudioView extends LinearLayout {
         ivDownloadTrack.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(SMNUtilities.checkIfStreamFileExistOnDisk(urlStream, downloadPath))
-                    Toast.makeText(getContext(), "Arquivo já existe em: " + downloadPath.getAbsolutePath(), Toast.LENGTH_LONG).show();
-                else{
-                    try {
-                        downloadAudio();
-                    } catch (SMNException e) {
-                        e.printStackTrace();
+                if(SMNUtilities.isStoragePermissionGranted(getContext())){
+                    if(SMNUtilities.checkIfStreamFileExistOnDisk(urlStream, downloadPath))
+                        Toast.makeText(getContext(), "Arquivo já existe em: " + downloadPath.getAbsolutePath(), Toast.LENGTH_LONG).show();
+                    else{
+                        try {
+                            downloadAudio();
+                        } catch (SMNException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
+                else
+                    Toast.makeText(getContext(), "Precisa de permissão para manipular arquivos", Toast.LENGTH_LONG).show();
             }
         });
 
