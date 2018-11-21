@@ -5,12 +5,14 @@ import android.content.res.TypedArray;
 import android.os.CountDownTimer;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
@@ -25,6 +27,8 @@ public class SMNRecordView extends LinearLayout {
     private SMNRecordConfigEntity smnRecordConfigEntity;
     private SMNRecord smnRecord;
     private CountDownTimer countDownTimer;
+    private Timer timer;
+    private long elapsedIndeterminateTime = 0;
 
     public SMNRecordView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -37,10 +41,24 @@ public class SMNRecordView extends LinearLayout {
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.Record, 0, 0);
 
+        int recDimensions = a.getDimensionPixelSize(R.styleable.Record_recDimensions, 0);
+
         a.recycle();
 
+        initComponents(recDimensions);
+    }
+
+    private void initComponents(int recDimensions){
         ivRecord = findViewById(R.id.ivRecord);
         tvTimer = findViewById(R.id.tvTimer);
+
+        if(recDimensions != 0){
+            int dimensionInDp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, recDimensions, getResources().getDisplayMetrics());
+
+            ivRecord.getLayoutParams().height = dimensionInDp;
+            ivRecord.getLayoutParams().width = dimensionInDp;
+            ivRecord.requestLayout();
+        }
     }
 
     public SMNRecordConfigEntity getSmnRecordConfigEntity() {
@@ -95,6 +113,49 @@ public class SMNRecordView extends LinearLayout {
         });
     }
 
+    public void addRecordConfigIndeterminate(final SMNRecordConfigEntity smnRecordConfigEntity, final OnRecordListener onRecordListener){
+        smnRecord = new SMNRecord();
+        this.smnRecordConfigEntity = smnRecordConfigEntity;
+        timer = new Timer();
+
+        ivRecord.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(smnRecord.isRecording()){
+                    stopRecordIndeterminate();
+                }
+                else{
+                    try {
+                        smnRecord.beginRecording(smnRecordConfigEntity.getRecordPath());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        onRecordListener.onError(e);
+                        return;
+                    }
+
+                    ivRecord.setImageResource(R.drawable.ic_stop);
+                    ivRecord.setBackgroundResource(R.drawable.selector_red);
+                    tvTimer.setVisibility(View.VISIBLE);
+
+                    onRecordListener.startRecording();
+
+                    timer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            elapsedIndeterminateTime += 1000;
+
+                            String totalTime = String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes(elapsedIndeterminateTime), TimeUnit.MILLISECONDS.toSeconds(elapsedIndeterminateTime) -
+                                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(elapsedIndeterminateTime)));
+
+                            tvTimer.setText(totalTime);
+                            onRecordListener.onTick(elapsedIndeterminateTime, totalTime);
+                        }
+                    }, 1000, 1000);
+                }
+            }
+        });
+    }
+
     private void startRecord(){
 
     }
@@ -108,5 +169,18 @@ public class SMNRecordView extends LinearLayout {
         smnRecord.stopRecording();
 
         countDownTimer.cancel();
+    }
+
+    private void stopRecordIndeterminate(){
+        ivRecord.setImageResource(R.drawable.ic_mic);
+        ivRecord.setBackgroundResource(R.drawable.selector_blue);
+        tvTimer.setText("00:00");
+        tvTimer.setVisibility(View.GONE);
+
+        smnRecord.stopRecording();
+
+        timer.cancel();
+
+        elapsedIndeterminateTime = 0;
     }
 }

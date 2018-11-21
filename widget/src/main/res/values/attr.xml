@@ -12,6 +12,10 @@
     </declare-styleable>
 
     <declare-styleable name="Record">
+        <attr name="recDimensions" format="dimension"/>
+    </declare-styleable>
 
+    <declare-styleable name="Video">
+        <attr name="heightDimension" format="dimension"/>
     </declare-styleable>
 </resources>
