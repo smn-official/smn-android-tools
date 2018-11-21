@@ -1,8 +1,8 @@
 package br.com.smn.tools.widget;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.support.annotation.Nullable;
@@ -16,7 +16,6 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.VideoView;
-
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -24,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import br.com.smn.tools.interfaces.OnAudioPlayingListener;
 import br.com.smn.tools.interfaces.OnPlayerEventListener;
+import br.com.smn.tools.interfaces.OnVideoEventListener;
 import br.com.smn.tools.widget.interfaces.OnVideoPlayingListener;
 
 public class SMNVideoView extends LinearLayout {
@@ -105,7 +105,7 @@ public class SMNVideoView extends LinearLayout {
         });
     }
 
-    public void readyToPlayForStreamAsync(String URL, final OnPlayerEventListener onPlayerEventListener){
+    public void readyToPlayForStream(final Activity activity, String URL, final OnVideoEventListener onVideoEventListener){
         vvVideo.setVideoPath(URL);
         vvVideo.setKeepScreenOn(true);
 
@@ -116,11 +116,6 @@ public class SMNVideoView extends LinearLayout {
                 llTransparenceLoad.setVisibility(GONE);
                 llControll.setVisibility(VISIBLE);
 
-                int duration = mediaPlayer.getDuration();
-
-                String totalTime = String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes(duration), TimeUnit.MILLISECONDS.toSeconds(duration) -
-                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)));
-
                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                     @Override
                     public void onCompletion(MediaPlayer mp) {
@@ -129,11 +124,64 @@ public class SMNVideoView extends LinearLayout {
                             timer.cancel();
 
                         mp.seekTo(0);
-                        onPlayerEventListener.onPlayingComplete();
+                        onVideoEventListener.onPlayingComplete();
                     }
                 });
 
-                onPlayerEventListener.onAudioReady(mediaPlayer.getDuration(), totalTime);
+                skTimeLine.setMax(vvVideo.getDuration());
+
+                skTimeLine.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        if(fromUser) {
+                            vvVideo.seekTo(progress);
+                            tvTimeElapsed.setText(getFormatedCurrentTime());
+                        }
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+
+                    }
+                });
+
+                ivPlayPauseVideo.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (isPlaying()) {
+                            ivPlayPauseVideo.setImageResource(R.drawable.ic_play_video);
+                            pause();
+                        } else {
+                            play(new OnVideoPlayingListener() {
+                                @Override
+                                public void onPlaying(final int currentPosition, final String formatedTime) {
+                                    activity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            skTimeLine.setProgress(currentPosition);
+                                            tvTimeElapsed.setText(formatedTime);
+                                        }
+                                    });
+                                }
+                            });
+
+                            ivPlayPauseVideo.setImageResource(R.drawable.ic_pause_video);
+                        }
+                    }
+                });
+
+                mediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
+                    @Override
+                    public void onBufferingUpdate(MediaPlayer mp, int percent) {
+                        if(((percent * skTimeLine.getMax()) / 100) < skTimeLine.getMax())
+                            skTimeLine.setSecondaryProgress((percent * skTimeLine.getMax()) / 100);
+                    }
+                });
             }
         });
 
@@ -163,40 +211,6 @@ public class SMNVideoView extends LinearLayout {
         }
     }
 
-    public void readyToPlayForStreamAsync(final OnPlayerEventListener onPlayerEventListener){
-        try {
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDataSource(audioFile);
-            mediaPlayer.prepare();
-
-            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mediaPlayer) {
-                    int duration = mediaPlayer.getDuration();
-
-                    String totalTime = String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes(duration), TimeUnit.MILLISECONDS.toSeconds(duration) -
-                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)));
-
-                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                        @Override
-                        public void onCompletion(MediaPlayer mp) {
-                            mp.pause();
-                            if(timer != null)
-                                timer.cancel();
-
-                            mp.seekTo(0);
-                            onPlayerEventListener.onPlayingComplete();
-                        }
-                    });
-
-                    onPlayerEventListener.onAudioReady(mediaPlayer.getDuration(), totalTime);
-                }
-            });
-        } catch (IOException e) {
-            onPlayerEventListener.onAudioReadyError(e);
-        }
-    }
-
     private void play(final OnVideoPlayingListener onVideoPlayingListener){
         timer = new Timer();
         vvVideo.start();
@@ -220,5 +234,12 @@ public class SMNVideoView extends LinearLayout {
 
     public boolean isPlaying(){
         return vvVideo.isPlaying();
+    }
+
+    public String getFormatedCurrentTime(){
+        int duration = vvVideo.getCurrentPosition();
+
+        return String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes(duration), TimeUnit.MILLISECONDS.toSeconds(duration) -
+                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)));
     }
 }

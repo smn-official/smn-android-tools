@@ -12,6 +12,7 @@ import java.io.IOException;
 import br.com.smn.tools.audio.SMNAudio;
 import br.com.smn.tools.exception.SMNException;
 import br.com.smn.tools.interfaces.OnPlayerEventListener;
+import br.com.smn.tools.interfaces.OnVideoEventListener;
 import br.com.smn.tools.interfaces.SMNDownloadListener;
 import br.com.smn.tools.widget.SMNAudioView;
 import br.com.smn.tools.widget.SMNRecordDialog;
@@ -102,7 +103,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         smnVideoView = findViewById(R.id.smnVideoView);
-        smnVideoView.loadVideoStreamAsync("https://s3-us-west-2.amazonaws.com/smn-mobile/cdp-desenv/EP1.mp4");
+        smnVideoView.readyToPlayForStream(this, "https://s3-us-west-2.amazonaws.com/smn-mobile/cdp-desenv/EP1.mp4", new OnVideoEventListener() {
+            @Override
+            public void onPlayingComplete() {
+                System.out.println("COMPLETOU");
+            }
+        });
 
     }
 }
