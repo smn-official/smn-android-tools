@@ -23,7 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:background="#73FFFFFF"
+            android:background="#80000000"
             android:layout_gravity="top"
             android:gravity="center_vertical"
             android:visibility="gone"
@@ -33,7 +33,7 @@
                 android:id="@+id/ivBack"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_arrow_back"
+                android:src="@drawable/selector_arrow_back"
                 android:visibility="gone"
                 android:clickable="true"/>
 
@@ -71,8 +71,8 @@
                     android:layout_height="wrap_content"
                     android:thumb="@drawable/custom_thumb"
                     android:progressDrawable="@drawable/smn_seek"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
                     android:layout_weight="1"/>
 
                 <TextView
@@ -97,7 +97,7 @@
                     android:id="@+id/ivPlayPauseVideo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_play_video"
+                    android:src="@drawable/selector_play_video"
                     android:padding="5dp"
                     android:layout_marginTop="5dp"
                     android:layout_marginBottom="5dp"

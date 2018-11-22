@@ -188,7 +188,7 @@ public class SMNVideoView extends LinearLayout {
                     @Override
                     public void onClick(View view) {
                         if (isPlaying()) {
-                            ivPlayPauseVideo.setImageResource(R.drawable.ic_play_video);
+                            ivPlayPauseVideo.setImageResource(R.drawable.selector_play_video);
                             pause();
                         } else {
                             play(new OnVideoPlayingListener() {
@@ -204,7 +204,7 @@ public class SMNVideoView extends LinearLayout {
                                 }
                             });
 
-                            ivPlayPauseVideo.setImageResource(R.drawable.ic_pause_video);
+                            ivPlayPauseVideo.setImageResource(R.drawable.selector_pause_video);
                         }
                     }
                 });
