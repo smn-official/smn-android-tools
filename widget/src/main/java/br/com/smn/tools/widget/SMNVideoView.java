@@ -58,6 +58,7 @@ public class SMNVideoView extends LinearLayout {
     private OnBackEventListener onBackEventListener;
 
     private boolean enableBack;
+    private boolean startOnLoad;
 
     public SMNVideoView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -78,13 +79,14 @@ public class SMNVideoView extends LinearLayout {
         //String audioTitle = a.getString(R.styleable.Options_audioTitle);
         //boolean deleteTrack = a.getBoolean(R.styleable.Options_deleteTrack, false);
         boolean enableBack = a.getBoolean(R.styleable.Video_enableBack, false);
+        boolean startOnLoad = a.getBoolean(R.styleable.Video_startOnLoad, false);
 
         a.recycle();
 
-        initComponents(enableBack);
+        initComponents(enableBack, startOnLoad);
     }
 
-    private void initComponents(boolean enableBack){
+    private void initComponents(boolean enableBack, boolean startOnLoad){
         llGeneralContainer = findViewById(R.id.llGeneralContainer);
         llEnableBack = findViewById(R.id.llEnableBack);
         frameContainer = findViewById(R.id.frameContainer);
@@ -133,6 +135,7 @@ public class SMNVideoView extends LinearLayout {
         });
 
         this.enableBack = enableBack;
+        this.startOnLoad = startOnLoad;
     }
 
     public void readyToPlayForStream(final Activity activity, String URL, final OnVideoEventListener onVideoEventListener){
@@ -213,6 +216,9 @@ public class SMNVideoView extends LinearLayout {
                             skTimeLine.setSecondaryProgress((percent * skTimeLine.getMax()) / 100);
                     }
                 });
+
+                if(startOnLoad)
+                    ivPlayPauseVideo.callOnClick();
             }
         });
 

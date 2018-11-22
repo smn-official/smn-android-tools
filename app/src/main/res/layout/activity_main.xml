@@ -37,6 +37,7 @@
         android:id="@+id/smnVideoView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        video:enableBack="true"/>
+        video:enableBack="true"
+        video:startOnLoad="true"/>
 
 </LinearLayout>

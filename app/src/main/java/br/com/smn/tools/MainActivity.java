@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
 
         smnVideoView = findViewById(R.id.smnVideoView);
         smnVideoView.setVideoTitle("50 - O SÍMBOLO DA PAZ");
-        smnVideoView.readyToPlayForStream(this, "https://s3-us-west-2.amazonaws.com/smn-mobile/cdp-desenv/EP1.mp4", new OnVideoEventListener() {
+        smnVideoView.readyToPlayForStream(this, "https://s3-us-west-2.amazonaws.com/smn-mobile/cdp-desenv/PUF_Boku_no_Hero_51_SD.mp4", new OnVideoEventListener() {
             @Override
             public void onPlayingComplete() {
                 System.out.println("COMPLETOU");
