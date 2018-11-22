@@ -16,14 +16,11 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.VideoView;
-import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
-
-import br.com.smn.tools.interfaces.OnAudioPlayingListener;
-import br.com.smn.tools.interfaces.OnPlayerEventListener;
 import br.com.smn.tools.interfaces.OnVideoEventListener;
+import br.com.smn.tools.widget.interfaces.OnBackEventListener;
 import br.com.smn.tools.widget.interfaces.OnVideoPlayingListener;
 
 public class SMNVideoView extends LinearLayout {
@@ -39,18 +36,28 @@ public class SMNVideoView extends LinearLayout {
     private SeekBar skTimeLine;
     // Play/Pause
     private ImageView ivPlayPauseVideo;
+    // Icon Back
+    private ImageView ivBack;
+    // Time Elapsed
+    private TextView tvChapterTitle;
     // Time Elapsed
     private TextView tvTimeElapsed;
     // Buffering
     private TextView tvBuffering;
     // Load antes do buffer estar pronto
     private LinearLayout llTransparenceLoad;
+    // Linear layout with title
+    private LinearLayout llEnableBack;
     // URL stream
     private String urlVideo;
     // Context Application
     private Context context;
     // Timer para controlar o tempo de vídeo
     private Timer timer;
+    // BackPressed Event Listener
+    private OnBackEventListener onBackEventListener;
+
+    private boolean enableBack;
 
     public SMNVideoView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -70,39 +77,62 @@ public class SMNVideoView extends LinearLayout {
         //Drawable drawable = a.getDrawable(R.styleable.Options_backgroundContainer);
         //String audioTitle = a.getString(R.styleable.Options_audioTitle);
         //boolean deleteTrack = a.getBoolean(R.styleable.Options_deleteTrack, false);
-        //boolean downloadTrack = a.getBoolean(R.styleable.Options_downloadTrack, false);
+        boolean enableBack = a.getBoolean(R.styleable.Video_enableBack, false);
 
         a.recycle();
 
-        initComponents();
+        initComponents(enableBack);
     }
 
-    private void initComponents(){
+    private void initComponents(boolean enableBack){
         llGeneralContainer = findViewById(R.id.llGeneralContainer);
+        llEnableBack = findViewById(R.id.llEnableBack);
         frameContainer = findViewById(R.id.frameContainer);
         llControll = findViewById(R.id.llControll);
         vvVideo = findViewById(R.id.vvVideo);
         skTimeLine = findViewById(R.id.skTimeLine);
         ivPlayPauseVideo = findViewById(R.id.ivPlayPauseVideo);
+        ivBack = findViewById(R.id.ivBack);
         tvTimeElapsed = findViewById(R.id.tvTimeElapsed);
+        tvChapterTitle = findViewById(R.id.tvChapterTitle);
         tvBuffering = findViewById(R.id.tvBuffering);
         llTransparenceLoad = findViewById(R.id.llTransparenceLoad);
+
+        if(enableBack){
+            ivBack.setVisibility(VISIBLE);
+            ivBack.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(onBackEventListener != null)
+                        onBackEventListener.backPressed();
+                }
+            });
+        }
 
         frameContainer.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                final Animation anim = AnimationUtils.loadAnimation(context, R.anim.fade_out);
+                final Animation animControll = AnimationUtils.loadAnimation(context, R.anim.fade_out);
+                final Animation animBack = AnimationUtils.loadAnimation(context, R.anim.fade_out);
 
                 if(llControll.isShown()){
-                    llControll.setAnimation(anim);
-                    anim.start();
+                    llControll.setAnimation(animControll);
+                    llEnableBack.setAnimation(animBack);
+
+                    animControll.start();
+                    animBack.start();
+
                     llControll.setVisibility(GONE);
+                    llEnableBack.setVisibility(GONE);
                 }
                 else{
                     llControll.setVisibility(VISIBLE);
+                    llEnableBack.setVisibility(VISIBLE);
                 }
             }
         });
+
+        this.enableBack = enableBack;
     }
 
     public void readyToPlayForStream(final Activity activity, String URL, final OnVideoEventListener onVideoEventListener){
@@ -115,6 +145,7 @@ public class SMNVideoView extends LinearLayout {
             public void onPrepared(MediaPlayer mediaPlayer) {
                 llTransparenceLoad.setVisibility(GONE);
                 llControll.setVisibility(VISIBLE);
+                llEnableBack.setVisibility(VISIBLE);
 
                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                     @Override
@@ -241,5 +272,13 @@ public class SMNVideoView extends LinearLayout {
 
         return String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes(duration), TimeUnit.MILLISECONDS.toSeconds(duration) -
                 TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)));
+    }
+
+    public void addBackPressed(OnBackEventListener onBackEventListener){
+        this.onBackEventListener = onBackEventListener;
+    }
+
+    public void setVideoTitle(String title){
+        tvChapterTitle.setText(title);
     }
 }

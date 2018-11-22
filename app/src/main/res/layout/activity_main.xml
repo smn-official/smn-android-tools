@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:mic="http://schemas.android.com/apk/res-auto"
+    xmlns:video="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -35,6 +36,7 @@
     <br.com.smn.tools.widget.SMNVideoView
         android:id="@+id/smnVideoView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        video:enableBack="true"/>
 
 </LinearLayout>

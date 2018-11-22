@@ -20,6 +20,7 @@ import br.com.smn.tools.widget.SMNRecordView;
 import br.com.smn.tools.widget.SMNVideoView;
 import br.com.smn.tools.widget.entity.SMNRecordConfigEntity;
 import br.com.smn.tools.widget.entity.SMNRecordDialogConfigEntity;
+import br.com.smn.tools.widget.interfaces.OnBackEventListener;
 import br.com.smn.tools.widget.interfaces.OnDeleteEventListener;
 import br.com.smn.tools.widget.interfaces.OnRecordListener;
 
@@ -103,10 +104,18 @@ public class MainActivity extends AppCompatActivity {
         });
 
         smnVideoView = findViewById(R.id.smnVideoView);
+        smnVideoView.setVideoTitle("50 - O SÍMBOLO DA PAZ");
         smnVideoView.readyToPlayForStream(this, "https://s3-us-west-2.amazonaws.com/smn-mobile/cdp-desenv/EP1.mp4", new OnVideoEventListener() {
             @Override
             public void onPlayingComplete() {
                 System.out.println("COMPLETOU");
+            }
+        });
+
+        smnVideoView.addBackPressed(new OnBackEventListener() {
+            @Override
+            public void backPressed() {
+                System.out.println("VOLTOU");
             }
         });
 
