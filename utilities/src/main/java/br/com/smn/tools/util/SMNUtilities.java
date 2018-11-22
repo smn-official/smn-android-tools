@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.util.Base64;
@@ -20,6 +21,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.Locale;
 import br.com.smn.tools.exception.SMNException;
 import br.com.smn.tools.interfaces.SMNDownloadListener;
@@ -218,5 +220,38 @@ public class SMNUtilities {
             e.printStackTrace();
             smnDownloadListener.onFail(e);
         }
+    }
+
+    /**
+     * Recupera um bitmap para ser usado como thumb de um vídeo informado
+     * @param videoPath URL do vídeo strem
+     * @param timeAt tempo do vídeo em que seja necessário retirar a imagem
+     * @return retorna o bitmap com a imagem no tempo de vídeo em que foi passado
+     * @throws Throwable caso algum erro aconteça.
+     */
+    public static Bitmap retriveVideoFrameFromVideo(String videoPath, long timeAt)
+            throws Throwable {
+        Bitmap bitmap = null;
+        MediaMetadataRetriever mediaMetadataRetriever = null;
+        try {
+            mediaMetadataRetriever = new MediaMetadataRetriever();
+            if (Build.VERSION.SDK_INT >= 14)
+                mediaMetadataRetriever.setDataSource(videoPath, new HashMap<String, String>());
+            else
+                mediaMetadataRetriever.setDataSource(videoPath);
+
+            bitmap = mediaMetadataRetriever.getFrameAtTime(timeAt, MediaMetadataRetriever.OPTION_CLOSEST);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Throwable(
+                    "Exception in retriveVideoFrameFromVideo(String videoPath)"
+                            + e.getMessage());
+
+        } finally {
+            if (mediaMetadataRetriever != null) {
+                mediaMetadataRetriever.release();
+            }
+        }
+        return bitmap;
     }
 }

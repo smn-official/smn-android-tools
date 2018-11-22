@@ -71,8 +71,8 @@
                     android:layout_height="wrap_content"
                     android:thumb="@drawable/custom_thumb"
                     android:progressDrawable="@drawable/smn_seek"
-                    android:layout_paddingLeft="10dp"
-                    android:layout_paddingRight="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
                     android:layout_weight="1"/>
 
                 <TextView
