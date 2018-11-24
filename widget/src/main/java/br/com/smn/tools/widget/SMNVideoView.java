@@ -287,4 +287,9 @@ public class SMNVideoView extends LinearLayout {
     public void setVideoTitle(String title){
         tvChapterTitle.setText(title);
     }
+
+    public void stopVideoActivities(){
+        vvVideo.stopPlayback();
+        timer.cancel();
+    }
 }
